@@ -8,21 +8,21 @@ const {
 
 module.exports = {
 	data: new SlashCommandBuilder()
-		.setName("kick")
-		.setDescription("Select a member and kick them (test).")
+		.setName("ban")
+		.setDescription("Select a member and ban them.")
 		.addUserOption((option) => {
 			return option
 				.setName("user")
-				.setDescription("member to kick")
+				.setDescription("member to ban")
 				.setRequired(true);
 		})
 		.addStringOption((option) => {
 			return option
 				.setName("reason")
-				.setDescription("Reason for kick")
+				.setDescription("Reason for ban")
 				.setRequired(true);
 		})
-		.setDefaultMemberPermissions(PermissionFlagsBits.KickMembers)
+		.setDefaultMemberPermissions(PermissionFlagsBits.BanMembers)
 		.setDMPermission(false),
 	async execute(interaction) {
 		const user = interaction.options.getUser("user");
@@ -31,7 +31,7 @@ module.exports = {
 
 		const confirmBtn = new ButtonBuilder()
 			.setCustomId("confirm")
-			.setLabel("Kick User")
+			.setLabel("Ban User")
 			.setStyle(ButtonStyle.Danger);
 		const cancelBtn = new ButtonBuilder()
 			.setCustomId("cancel")
@@ -40,13 +40,13 @@ module.exports = {
 
 		const row = new ActionRowBuilder().addComponents(cancelBtn, confirmBtn);
 		const response = await interaction.reply({
-			content: `Are you sure you want to kick ${user.username} for ${reason}?`,
+			content: `Are you sure you want to ban ${user.username} for ${reason}?`,
 			components: [row],
 		});
 
 		// only user who triggered interaction can use buttons
 		const collectorFilter = (i) => i.user.id === interaction.user.id;
-
+		
 		try {
 			const confirmation = await response.awaitMessageComponent({
 				filter: collectorFilter,
@@ -54,9 +54,9 @@ module.exports = {
 			});
 
 			if (confirmation.customId === "confirm") {
-				await interaction.guild.members.kick(user);
+				await interaction.guild.members.ban(user);
 				await confirmation.update({
-					content: `${user.username} has been kicked for: ${reason}`,
+					content: `${user.username} has been banned for: ${reason}`,
 					components: [],
 				});
 			} else if (confirmation.customId === "cancel") {
